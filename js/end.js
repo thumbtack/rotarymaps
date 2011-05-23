@@ -1,0 +1,2 @@
+return cg;
+})(Raphael.ninja());
