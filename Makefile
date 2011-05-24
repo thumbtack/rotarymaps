@@ -45,7 +45,9 @@ build/rotarymaps.js: $(JS_FILES) Makefile
 build/rotarymaps_min.js: build/rotarymaps.js
 	rm -f $@
 	cat js/license.js >> $@
-	cat build/rotarymaps.js | java -jar yuicompressor-2.4.2.jar --charset UTF-8 --type js >> $@
+	curl -s --data-urlencode 'js_code@build/rotarymaps.js' --data-urlencode 'output_format=text' \
+		--data-urlencode 'output_info=compiled_code' http://closure-compiler.appspot.com/compile \
+		>> $@
 
 release/rotarymaps_min.$(VERSION).js: build/rotarymaps_min.js
 	mkdir -p release
