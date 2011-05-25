@@ -45,7 +45,9 @@ $(function() {
     datasource = new R.Datasource(),
     seen = {},
     layer = new R.Bubble({
-        radius: 5,
+        radius: function(item) {
+            return Math.sqrt(15 * item.val);
+        },
         fade_in: 2000,
         fade_out: {
             after: 1000 * 60 * 10,
@@ -71,7 +73,7 @@ $(function() {
                 datasource.push({
                     lat: item["georss:point"].split(" ")[0],
                     lng: item["georss:point"].split(" ")[1],
-                    val: 1
+                    val: parseFloat(item["title"].split(" ")[1])
                 });
             }
         }
