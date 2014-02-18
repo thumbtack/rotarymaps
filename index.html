@@ -34,8 +34,8 @@
     .footer { text-align:center; padding-top:30px; font-style: italic; }
   </style>
 
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
-  <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+  <script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
   <script src="rotarymaps_min.0.2.js"></script>
 
 <script>
@@ -65,31 +65,40 @@ $(function() {
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         disableDefaultUI: true
     }),
-    process = function(items) {
-        for (var key in items) {
-            var item = items[key];
-            if (!seen[item.link]) {
-                seen[item.link] = true;
-                datasource.push({
-                    lat: item["georss:point"].split(" ")[0],
-                    lng: item["georss:point"].split(" ")[1],
-                    val: parseFloat(item["title"].split(" ")[1])
-                });
+    process = function(json) {
+        var features = json.value.items,
+            i,
+            feature,
+            key;
+
+        for (i = 0; i < features.length; i++) {
+            feature = features[i];
+            key = feature.properties.url;
+
+            if (seen[key]) {
+                continue;
             }
+
+            datasource.push({
+                lat: feature.geometry.coordinates[1],
+                lng: feature.geometry.coordinates[0],
+                val: feature.properties.mag || 0
+            });
+            seen[key] = true;
         }
     },
     get = function(type) {
-        var url = "http://pipes.yahoo.com/pipes/pipe.run?_id=62e77025a1d7e878667162803de585da&_render=json";
+        var url = "http://pipes.yahoo.com/pipes/pipe.run?_id=b5fd828a137f03b0e5f85d51e0c6b7ca&_render=json";
         $.ajax({
             url: url,
             dataType: "jsonp",
             jsonp: "_callback",
             jsonpCallback: "__RM_callback",
-            success: function(data) {
-                process(data.value.items);
-            },
-            error: function() {
-                alert("There was an error collecting USGS data.");
+            success: process,
+            error: function(d) {
+                if (window.console) {
+                    console.log("error", d);
+                }
             }
         });
 
